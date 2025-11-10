@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Слоты АПЛ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Футбольные декоративные элементы -->
+    <div class="football-decorations">
+        <div class="football-decoration ball-1">⚽</div>
+        <div class="football-decoration ball-2">⚽</div>
+        <div class="football-decoration ball-3">⚽</div>
+    </div>
+    
+    <!-- Экран выбора клуба -->
+    <div id="clubSelectionScreen" class="screen active">
+        <div class="container">
+            <h1 class="title">Слоты АПЛ</h1>
+            <p class="subtitle">Выбери свой клуб и победи все команды лиги</p>
+            <div id="clubsGrid" class="clubs-grid">
+                <!-- Клубы будут добавлены через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Карта оппонентов -->
+    <div id="opponentsMapScreen" class="screen">
+        <div class="container">
+            <h2 class="title">Карта оппонентов</h2>
+            <p class="subtitle">Твои соперники в этом турнире. Пройдешь все 19 за один раз?</p>
+            <button id="startBattleButton" class="start-battle-button">Начать</button>
+            <div id="opponentsMap" class="opponents-map">
+                <!-- Оппоненты будут добавлены через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Игровой экран -->
+    <div id="gameScreen" class="screen">
+        <div class="container">
+            <div class="game-header">
+                <div class="opponent-info">
+                    <div class="opponent-logo-container">
+                        <div id="opponentLogo" class="opponent-logo"></div>
+                    </div>
+                    <div class="opponent-info-content">
+                        <div class="opponent-header-row">
+                            <h2 id="opponentName">Бернли</h2>
+                        </div>
+                        <div class="hp-bar-shell">
+                            <div class="hp-bar-track">
+                                <div id="opponentHPBar" class="hp-bar-fill"></div>
+                                <div class="hp-bar-overlay">
+                                    <span id="opponentHPText" class="opponent-hp-text">1200 / 1200</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-stats">
+                    <div class="stat">Побеждено: <span id="defeatedCount">0</span>/19</div>
+                    <div class="stat">Атак осталось: <span id="spinsLeft">5</span></div>
+                </div>
+            </div>
+
+            <div class="slot-machine">
+                <div class="slot-machine-header">
+                    <div id="machineTitle" class="machine-title">⚽ КОМАНДА АТАКУЕТ ⚽</div>
+                    <div id="machineSubtitle" class="machine-subtitle"></div>
+                </div>
+                <div class="slot-machine-body">
+                    <div class="slot-window-container">
+                        <div class="slot-window" id="slot1">
+                            <div class="slot-reel">
+                                <div class="slot-item-container"></div>
+                            </div>
+                            <div class="slot-frame-top"></div>
+                            <div class="slot-frame-bottom"></div>
+                        </div>
+                        <div class="slot-window" id="slot2">
+                            <div class="slot-reel">
+                                <div class="slot-item-container"></div>
+                            </div>
+                            <div class="slot-frame-top"></div>
+                            <div class="slot-frame-bottom"></div>
+                        </div>
+                        <div class="slot-window" id="slot3">
+                            <div class="slot-reel">
+                                <div class="slot-item-container"></div>
+                            </div>
+                            <div class="slot-frame-top"></div>
+                            <div class="slot-frame-bottom"></div>
+                        </div>
+                    </div>
+                    <div class="slot-machine-controls">
+                        <div class="spin-button-container">
+                            <button id="spinButton" class="spin-button">
+                                <span class="spin-button-text">Атаковать</span>
+                                <span class="spin-button-icon">⚽</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="damageDisplay" class="damage-display"></div>
+        </div>
+    </div>
+
+    <!-- Соперник побежден -->
+    <div id="postRoundScreen" class="screen">
+        <div class="container">
+            <h2 id="postRoundTitle" class="title">Соперник побежден!</h2>
+            <p id="postRoundSubtitle" class="subtitle">Выбери бонус, чтобы усилить команду перед следующим матчем.</p>
+            <button id="chooseBonusButton" class="start-battle-button">Выбрать бонус</button>
+            <div id="postRoundMap" class="opponents-map post-round-map"></div>
+        </div>
+    </div>
+
+    <!-- Экран усиления между раундами -->
+    <div id="upgradeScreen" class="screen">
+        <div class="container">
+            <h2 class="title">Выбери игрока для усиления</h2>
+            <p class="subtitle">Усиленный игрок получит x2 к силе и будет чаще выпадать</p>
+            <div id="upgradeOptions" class="upgrade-options">
+                <!-- Опции будут добавлены через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран победы/поражения -->
+    <div id="resultScreen" class="screen">
+        <div class="container">
+            <h2 id="resultTitle" class="title"></h2>
+            <p id="resultMessage" class="subtitle"></p>
+            <button id="sirenaRescueButton" class="start-battle-button sirena-button" type="button">Спастись</button>
+            <button id="continueButton" class="continue-button" style="display: none;">Продолжить</button>
+            <button id="restartButton" class="restart-button" style="display: none;">Начать заново</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="logos.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
+
