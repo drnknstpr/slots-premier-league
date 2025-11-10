@@ -1587,7 +1587,7 @@ async function animateDamageBreakdown(players, contributions, baseDamage, totalD
         totalWrapper.classList.remove('reveal', 'highlight');
         void totalWrapper.offsetWidth;
         totalWrapper.textContent = `${baseDamage} × ${multiplierDisplay} → ${damageAfterMultiplier}`;
-        totalWrapper.classList.add('highlight');
+        totalWrapper.classList.add('reveal', 'highlight');
 
         await wait(260);
     } else {
@@ -1611,7 +1611,7 @@ async function animateDamageBreakdown(players, contributions, baseDamage, totalD
         totalWrapper.classList.remove('reveal', 'highlight');
         void totalWrapper.offsetWidth;
         totalWrapper.textContent = `${damageAfterMultiplier} + ${bonusDamage} → ${damageAfterMultiplier + bonusDamage}`;
-        totalWrapper.classList.add('highlight');
+        totalWrapper.classList.add('reveal', 'highlight');
 
         await wait(220);
     }
