@@ -7,7 +7,7 @@ let gameState = {
     maxOpponentHP: 0,
     spinsLeft: 6,
     defeatedCount: 0,
-    boostedPlayers: new Set(), // ID усиленных игроков
+    boostedPlayers: new Map(), // Map<ID, multiplier>
     isSpinning: false,
     audioContext: null, // AudioContext для звуков
     musicAudio: null,
@@ -35,6 +35,13 @@ let gameState = {
     tutorialCompletedIntro: false,
     tutorialCompletedCard: false
 };
+
+function getBoostMultiplier(playerId) {
+    if (!playerId) {
+        return 1;
+    }
+    return gameState.boostedPlayers.get(playerId) || 1;
+}
 
 // Инициализация AudioContext
 function initAudio() {
@@ -883,7 +890,7 @@ async function resolvePenaltyShot() {
 }
 
 async function applyPenaltyDamage(player, slotElement) {
-    const damage = gameState.boostedPlayers.has(player.id) ? player.rating * 2 : player.rating;
+    const damage = Math.round(player.rating * getBoostMultiplier(player.id));
 
     playHitSound();
     applyHitEffect([slotElement], damage);
@@ -1161,6 +1168,20 @@ async function spinSlots() {
     const spinDuration = 2640;
     const settleDelay = 384;
 
+    const totalSlots = slots.length;
+    const canOfferSirenaBonus =
+        !gameState.bonusGiven &&
+        !gameState.sirenaClaimed &&
+        gameState.spinCount >= 2 &&
+        totalSlots > 0 &&
+        gameState.tutorialCompletedCard;
+    const sirenaBonusPlan = canOfferSirenaBonus
+        ? {
+            slotIndex: Math.floor(Math.random() * totalSlots),
+            entry: null
+        }
+        : null;
+
     startPlayerRandomizeSound();
 
     try {
@@ -1196,8 +1217,15 @@ async function spinSlots() {
             }
 
             const player = getRandomPlayer(preferredRole, roleBiasMultiplier);
-            renderPlayerInSlot(slot, player);
-            spinResults.push({ player, slot });
+            const entry = { player, slot };
+            if (sirenaBonusPlan && index === sirenaBonusPlan.slotIndex) {
+                entry.isSirenaBonusCandidate = true;
+                slot.classList.add('sirena-bonus-pending');
+                sirenaBonusPlan.entry = entry;
+            } else {
+                renderPlayerInSlot(slot, player);
+            }
+            spinResults.push(entry);
 
             if (!gameState.tutorialCompletedCard) {
                 const hadRandomizeSound = gameState.randomizeSoundNodes.length > 0;
@@ -1218,7 +1246,22 @@ async function spinSlots() {
         stopPlayerRandomizeSound();
         stopSpinSound();
 
-        if (!gameState.bonusGiven && !gameState.sirenaClaimed && gameState.spinCount >= 2 && spinResults.length) {
+        if (sirenaBonusPlan && sirenaBonusPlan.entry && spinResults.includes(sirenaBonusPlan.entry)) {
+            const { slot, player } = sirenaBonusPlan.entry;
+            const bonusValue = await renderBonusCard(slot);
+            slot.classList.remove('sirena-bonus-pending');
+            if (bonusValue > 0) {
+                const entryIndex = spinResults.indexOf(sirenaBonusPlan.entry);
+                if (entryIndex !== -1) {
+                    spinResults.splice(entryIndex, 1);
+                }
+                gameState.bonusGiven = true;
+            } else {
+                await wait(400);
+                renderPlayerInSlot(slot, player);
+                gameState.bonusGiven = true;
+            }
+        } else if (!gameState.bonusGiven && !gameState.sirenaClaimed && gameState.spinCount >= 2 && spinResults.length) {
             const bonusIndex = Math.floor(Math.random() * spinResults.length);
             const bonusEntry = spinResults[bonusIndex];
             await renderBonusCard(bonusEntry.slot);
@@ -1252,8 +1295,9 @@ function getRandomPlayer(preferredRole = null, roleBiasMultiplier = 1) {
     // Вычисляем веса с учетом усиленных игроков
     const weights = ARSENAL_PLAYERS.map(player => {
         let weight = 1; // Базовая вероятность для всех игроков одинаковая
-        if (gameState.boostedPlayers.has(player.id)) {
-            weight *= BOOSTED_WEIGHT_MULTIPLIER; // Усиленные игроки выпадают в 2 раза чаще
+        const boostMultiplier = getBoostMultiplier(player.id);
+        if (boostMultiplier > 1) {
+            weight *= BOOSTED_WEIGHT_MULTIPLIER * boostMultiplier; // Усиленные игроки выпадают чаще
         }
         if (preferredRole && player.role === preferredRole && roleBiasMultiplier > 1) {
             weight *= roleBiasMultiplier;
@@ -1287,7 +1331,7 @@ function createSpinningEffect(slotElement) {
     
     // Создаем длинную полосу с игроками для плавной прокрутки
     container.innerHTML = players.map((player, index) => {
-        const actualRating = gameState.boostedPlayers.has(player.id) ? player.rating * 2 : player.rating;
+        const actualRating = Math.round(player.rating * getBoostMultiplier(player.id));
         const cardMarkup = getPlayerCardMarkup(player, actualRating);
         return `
             <div class="spinning-item" style="position: absolute; top: ${index * 320}px; left: 0; right: 0; width: 100%; height: 320px; display: flex; align-items: center; justify-content: center; padding: 24px;">
@@ -1335,7 +1379,7 @@ function getPlayerRarity(player) {
 
 // Отрисовка игрока в слоте
 function renderPlayerInSlot(slotElement, player) {
-    const actualRating = gameState.boostedPlayers.has(player.id) ? player.rating * 2 : player.rating;
+    const actualRating = Math.round(player.rating * getBoostMultiplier(player.id));
     
     const container = slotElement.querySelector('.slot-item-container');
     container.innerHTML = getPlayerCardMarkup(player, actualRating);
@@ -1455,11 +1499,13 @@ function applyHitEffect(sourceSlots, actualDamage) {
     }
 }
 
-async function animateDamageBreakdown(players, contributions, baseDamage, totalDamage, multiplier, comboText, hpBefore, hpAfter, bonusDamage = 0) {
+async function animateDamageBreakdown(players, contributions, baseDamage, totalDamage, multiplier, comboText, hpBefore, hpAfter, bonusDamage = 0, displayOptions = {}) {
     const damageDisplay = document.getElementById('damageDisplay');
     if (!damageDisplay) {
         return;
     }
+
+    const { preserveBaseSumValue = false } = displayOptions || {};
 
     damageDisplay.innerHTML = '';
     damageDisplay.classList.remove('damage-pop');
@@ -1582,7 +1628,9 @@ async function animateDamageBreakdown(players, contributions, baseDamage, totalD
         await wait(200);
         comboRow.classList.add('reveal');
 
-        baseSumRow.querySelector('.damage-sum-value').textContent = `${baseDamage} × ${multiplierDisplay}`;
+        if (!preserveBaseSumValue) {
+            baseSumRow.querySelector('.damage-sum-value').textContent = `${baseDamage} × ${multiplierDisplay}`;
+        }
 
         totalWrapper.classList.remove('reveal', 'highlight');
         void totalWrapper.offsetWidth;
@@ -1638,7 +1686,7 @@ async function applyDamageForPlayers(players, sourceSlots = [], options = {}) {
         comboTextOverride = ''
     } = options;
 
-    const contributions = players.map(player => gameState.boostedPlayers.has(player.id) ? player.rating * 2 : player.rating);
+    const contributions = players.map(player => Math.round(player.rating * getBoostMultiplier(player.id)));
     const basePlayerDamage = contributions.reduce((sum, value) => sum + value, 0);
     const bonusDamage = gameState.pendingSirenaBonus || 0;
     
@@ -1669,7 +1717,19 @@ async function applyDamageForPlayers(players, sourceSlots = [], options = {}) {
     const hpBefore = gameState.currentOpponentHP;
     const hpAfter = Math.max(0, hpBefore - totalDamage);
 
-    await animateDamageBreakdown(players, contributions, baseDamage, totalDamage, multiplier, comboText, hpBefore, hpAfter, bonusDamage);
+    const preserveBaseSumValue = comboText === 'Пенальти' && multiplier > 1 && players.length === 1;
+    await animateDamageBreakdown(
+        players,
+        contributions,
+        baseDamage,
+        totalDamage,
+        multiplier,
+        comboText,
+        hpBefore,
+        hpAfter,
+        bonusDamage,
+        { preserveBaseSumValue }
+    );
 
     playHitSound();
     applyHitEffect(sourceSlots, totalDamage);
@@ -1710,7 +1770,7 @@ async function applyDamageForPlayers(players, sourceSlots = [], options = {}) {
 }
 
 function applyPenaltyBonus(player) {
-    const baseDamage = gameState.boostedPlayers.has(player.id) ? player.rating * 2 : player.rating;
+    const baseDamage = Math.round(player.rating * getBoostMultiplier(player.id));
     const bonusDamage = baseDamage * 3;
     gameState.currentOpponentHP = Math.max(0, gameState.currentOpponentHP - bonusDamage);
     return bonusDamage;
@@ -1781,8 +1841,8 @@ function showUpgradeScreen() {
         option.className = 'upgrade-option';
         
         const baseRating = player.rating;
-        const isBoosted = gameState.boostedPlayers.has(player.id);
-        const currentRating = isBoosted ? baseRating * 2 : baseRating;
+        const currentMultiplier = getBoostMultiplier(player.id);
+        const currentRating = Math.round(baseRating * currentMultiplier);
         const upgradedRating = currentRating * 2;
         const cardMarkup = getPlayerCardMarkup(player, currentRating);
         
@@ -1801,7 +1861,9 @@ function showUpgradeScreen() {
         }
         
         option.addEventListener('click', () => {
-            gameState.boostedPlayers.add(player.id);
+            const previousMultiplier = getBoostMultiplier(player.id);
+            const nextMultiplier = previousMultiplier * 2;
+            gameState.boostedPlayers.set(player.id, nextMultiplier);
             gameState.currentOpponentIndex++;
             loadOpponent();
             showScreen('game');
@@ -1973,6 +2035,7 @@ function setupEventListeners() {
     const sirenaRescueButton = document.getElementById('sirenaRescueButton');
     if (sirenaRescueButton) {
         sirenaRescueButton.addEventListener('click', () => {
+            window.open('https://sirena.world', '_blank', 'noopener');
             continueAfterRescue();
         });
     }
