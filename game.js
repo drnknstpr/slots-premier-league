@@ -5,7 +5,6 @@ let gameState = {
     currentOpponentIndex: 0,
     currentOpponentHP: 0,
     maxOpponentHP: 0,
-    spinsLeft: 1,
     defeatedCount: 0,
     boostedPlayers: new Map(), // Map<ID, multiplier>
     isSpinning: false,
@@ -706,7 +705,6 @@ function startGame() {
     gameState.defeatedCount = 0;
     gameState.boostedPlayers.clear();
     gameState.spinCount = 0;
-    gameState.spinsLeft = 1;
     gameState.bonusGiven = false;
     gameState.lastProgressPercent = 100;
     gameState.penaltyWillTrigger = false;
@@ -744,7 +742,6 @@ function loadOpponent() {
     const opponent = gameState.opponentsList[gameState.currentOpponentIndex];
     gameState.maxOpponentHP = opponent.hp;
     gameState.currentOpponentHP = opponent.hp;
-    gameState.spinsLeft = 1;
     gameState.spinCount = 0;
     gameState.bonusGiven = false;
     gameState.penaltyWillTrigger = false;
@@ -790,35 +787,7 @@ function resetSlotsUI() {
 }
 
 function startPenaltyEvent() {
-    if (gameState.spinsLeft === 0) {
-        return false;
-    }
-
-    gameState.penaltyActive = true;
-    gameState.penaltyPhase = 'awaitingSelection';
-    gameState.penaltyPlayer = null;
-    gameState.penaltySlotIndex = Math.floor(Math.random() * 3);
-    gameState.penaltyOccurred = true;
-    gameState.penaltyWillTrigger = false;
-
-    gameState.spinCount = (gameState.spinCount || 0) + 1;
-    gameState.spinsLeft--;
-    updateGameUI();
-    resetSlotsUI();
-
-    setMachineTitle(MACHINE_TITLE_PENALTY);
-    setMachineSubtitle(PENALTY_SUBTITLE_TEXT);
-    showPenaltySelectionPrompt();
-
-    const spinButton = document.getElementById('spinButton');
-    if (spinButton) {
-        const textSpan = spinButton.querySelector('.spin-button-text');
-        if (textSpan) {
-            textSpan.textContent = 'Выбери бьющего';
-        }
-    }
-
-    return true;
+    return false;
 }
 
 async function handlePenaltyFlow() {
@@ -1180,7 +1149,6 @@ function updateGameUI() {
     if (defeatedStat) {
         defeatedStat.innerHTML = `Побеждено: <span id="defeatedCount">${gameState.defeatedCount}</span>/${totalOpponents}`;
     }
-    document.getElementById('spinsLeft').textContent = gameState.spinsLeft;
     
     // Обновляем логотип оппонента
     updateOpponentLogo();
@@ -1188,7 +1156,7 @@ function updateGameUI() {
     // Обновляем состояние кнопки спина
     const spinButton = document.getElementById('spinButton');
     if (spinButton) {
-        const shouldDisable = gameState.isSpinning || gameState.spinsLeft === 0;
+        const shouldDisable = gameState.isSpinning || (gameState.spinCount >= 1 && gameState.currentOpponentHP > 0);
         spinButton.disabled = shouldDisable;
         // Убедимся, что кнопка видима и кликабельна
         if (!shouldDisable) {
@@ -1205,7 +1173,7 @@ function updateGameUI() {
 async function spinSlots() {
     const spinButton = document.getElementById('spinButton');
 
-    if (gameState.spinsLeft === 0) {
+    if (gameState.spinCount >= 1 && !gameState.penaltyActive) {
         return;
     }
 
@@ -1218,7 +1186,6 @@ async function spinSlots() {
     
     gameState.isSpinning = true;
     gameState.spinCount = upcomingSpinIndex;
-    gameState.spinsLeft--;
     updateGameUI();
     
     if (spinButton) {
@@ -1890,7 +1857,7 @@ function checkGameState() {
         } else {
             showUpgradeScreen();
         }
-    } else if (gameState.spinsLeft === 0) {
+    } else if (gameState.spinCount >= 1) {
         showDefeat();
     }
 }
@@ -1964,6 +1931,10 @@ function showScreen(screenName) {
 // Победа
 function showVictory() {
     stopCheerSound();
+    const statusEl = document.getElementById('resultStatus');
+    if (statusEl) {
+        statusEl.textContent = '';
+    }
     document.getElementById('resultTitle').textContent = 'Победа! 🏆';
     const totalOpponents = gameState.opponentsList ? gameState.opponentsList.length : 19;
     document.getElementById('resultMessage').textContent = 
@@ -1981,6 +1952,10 @@ function showDefeat() {
     }
     
     playWhistleSound();
+    const statusEl = document.getElementById('resultStatus');
+    if (statusEl) {
+        statusEl.textContent = 'Ты повержен';
+    }
     document.getElementById('resultTitle').textContent = 'Sirena Bet спасёт твою игру';
     document.getElementById('resultMessage').textContent = 
         'Перейди в клиент Sirena Bet и продолжай матч с того же места.';
@@ -1992,7 +1967,6 @@ function showDefeat() {
 
 function continueAfterRescue() {
     stopCheerSound();
-    gameState.spinsLeft = 1;
     gameState.isSpinning = false;
     gameState.penaltyActive = false;
     gameState.penaltyPhase = null;

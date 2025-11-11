@@ -937,7 +937,7 @@ body::after {
 .game-stats {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
 }
 
 .stat {
@@ -949,6 +949,33 @@ body::after {
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.9);
+}
+
+.sirena-team-button {
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    background: rgba(248, 113, 113, 0.18);
+    color: #fecaca;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    backdrop-filter: blur(6px);
+}
+
+.sirena-team-button:hover {
+    transform: translateY(-2px);
+    background: rgba(248, 113, 113, 0.28);
+    border-color: rgba(248, 113, 113, 0.65);
+    box-shadow: 0 12px 24px rgba(248, 113, 113, 0.22);
+}
+
+.sirena-team-button:active {
+    transform: translateY(0);
+    background: rgba(248, 113, 113, 0.38);
 }
 
 /* Футбольное поле - игровая зона */
@@ -2459,6 +2486,15 @@ body::after {
 .restart-button {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+}
+
+.result-status {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: rgba(248, 113, 113, 0.95);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 18px;
 }
 
 .continue-button:hover,
