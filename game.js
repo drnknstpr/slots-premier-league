@@ -1858,7 +1858,20 @@ function checkGameState() {
             showUpgradeScreen();
         }
     } else if (gameState.spinCount >= 1) {
-        showDefeat();
+        if (gameState.currentOpponentIndex < 3) {
+            gameState.currentOpponentHP = 0;
+            updateGameUI();
+            gameState.defeatedCount++;
+            const totalOpponents = gameState.opponentsList ? gameState.opponentsList.length : 19;
+            
+            if (gameState.defeatedCount >= totalOpponents) {
+                showVictory();
+            } else {
+                showUpgradeScreen();
+            }
+        } else {
+            showDefeat();
+        }
     }
 }
 
