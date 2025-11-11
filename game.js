@@ -1968,6 +1968,8 @@ function showDefeat() {
 function continueAfterRescue() {
     stopCheerSound();
     gameState.isSpinning = false;
+    gameState.spinCount = 0;
+    gameState.bonusGiven = false;
     gameState.penaltyActive = false;
     gameState.penaltyPhase = null;
     gameState.penaltyPlayer = null;
