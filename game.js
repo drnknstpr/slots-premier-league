@@ -32,6 +32,7 @@ let gameState = {
     bonusClaimedThisRound: false,
     pendingSirenaBonus: 0,
     sirenaClaimed: false,
+    shouldOfferSirenaBonus: false,
     tutorialActive: false,
     tutorialStep: null,
     tutorialCompletedIntro: false,
@@ -757,6 +758,8 @@ function loadOpponent() {
     gameState.pendingSirenaBonus = 0;
     gameState.awaitingBonusChoice = false;
     gameState.sirenaClaimed = false;
+    const roundNumber = gameState.currentOpponentIndex + 1;
+    gameState.shouldOfferSirenaBonus = roundNumber >= 2 && ((roundNumber - 2) % 3 === 0);
 
     resetSlotsUI();
 
@@ -1248,6 +1251,7 @@ async function spinSlots() {
 
     const totalSlots = slots.length;
     const canOfferSirenaBonus =
+        gameState.shouldOfferSirenaBonus &&
         !gameState.bonusGiven &&
         !gameState.sirenaClaimed &&
         gameState.spinCount >= 1 &&
@@ -1324,17 +1328,13 @@ async function spinSlots() {
                     spinResults.splice(entryIndex, 1);
                 }
                 gameState.bonusGiven = true;
+                gameState.shouldOfferSirenaBonus = false;
             } else {
                 await wait(400);
                 renderPlayerInSlot(slot, player);
                 gameState.bonusGiven = true;
+                gameState.shouldOfferSirenaBonus = false;
             }
-        } else if (!gameState.bonusGiven && !gameState.sirenaClaimed && gameState.spinCount >= 2 && spinResults.length) {
-            const bonusIndex = Math.floor(Math.random() * spinResults.length);
-            const bonusEntry = spinResults[bonusIndex];
-            await renderBonusCard(bonusEntry.slot);
-            spinResults.splice(bonusIndex, 1);
-            gameState.bonusGiven = true;
         }
 
         if (spinResults.length) {
@@ -1908,6 +1908,12 @@ function showUpgradeScreen() {
     const container = document.getElementById('upgradeOptions');
     container.innerHTML = '';
     
+    const opponentMessage = document.getElementById('upgradeOpponentMessage');
+    if (opponentMessage) {
+        const opponent = gameState.opponentsList?.[gameState.currentOpponentIndex];
+        opponentMessage.textContent = opponent ? `${opponent.name} повержен` : '';
+    }
+
     upgradeOptions.forEach(player => {
         const option = document.createElement('div');
         option.className = 'upgrade-option';

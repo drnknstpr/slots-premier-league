@@ -2371,6 +2371,15 @@ body::after {
     margin-top: 40px;
 }
 
+.upgrade-opponent-message {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(134, 239, 172, 0.95);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 24px;
+}
+
 .upgrade-option {
     background: rgba(255,255,255,0.1);
     border: 3px solid rgba(255,255,255,0.3);
