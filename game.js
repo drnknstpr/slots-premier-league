@@ -479,9 +479,7 @@ const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Элементы DOM
 const screens = {
     clubSelection: document.getElementById('clubSelectionScreen'),
-    opponentsMap: document.getElementById('opponentsMapScreen'),
     game: document.getElementById('gameScreen'),
-    postRound: document.getElementById('postRoundScreen'),
     upgrade: document.getElementById('upgradeScreen'),
     result: document.getElementById('resultScreen')
 };
@@ -691,66 +689,7 @@ function renderClubSelection() {
 // Выбор клуба
 function selectClub(club) {
     gameState.selectedClub = club;
-    showOpponentsMap();
-}
-
-function renderOpponentsMap(container, opponentsList, { showStatus = false } = {}) {
-    if (!container) {
-        return;
-    }
-
-    container.innerHTML = '';
-
-    if (!opponentsList || !opponentsList.length) {
-        return;
-    }
-
-    const wrapper = document.createElement('div');
-    wrapper.className = showStatus ? 'post-round-map' : 'opponents-map';
-    container.appendChild(wrapper);
-
-    opponentsList.forEach((opponent, index) => {
-        const card = document.createElement('div');
-        card.className = 'opponent-map-card';
-
-        let statusLabel = '';
-        if (showStatus) {
-            if (index < gameState.defeatedCount) {
-                card.classList.add('defeated');
-                statusLabel = 'Побеждён';
-            } else if (index === gameState.defeatedCount && gameState.defeatedCount < opponentsList.length) {
-                card.classList.add('next');
-                statusLabel = 'Следующий';
-            } else {
-                card.classList.add('upcoming');
-            }
-        }
-
-        let logoHTML = '';
-        if (CLUB_LOGOS[opponent.id] && CLUB_LOGOS[opponent.id].image) {
-            logoHTML = `<img src="${CLUB_LOGOS[opponent.id].image}" alt="${opponent.name}" class="opponent-map-logo">`;
-        }
-
-        card.innerHTML = `
-            <div class="opponent-map-number">${index + 1}</div>
-            ${statusLabel ? `<div class="opponent-status-badge">${statusLabel}</div>` : ''}
-            ${logoHTML}
-            <div class="opponent-map-name">${opponent.name}</div>
-            <div class="opponent-map-hp">HP: ${opponent.hp}</div>
-        `;
-
-        wrapper.appendChild(card);
-    });
-}
-
-// Показ карты оппонентов
-function showOpponentsMap() {
-    const opponentsList = getOpponentsList(gameState.selectedClub.id);
-    const mapContainer = document.getElementById('opponentsMap');
-    gameState.opponentsList = opponentsList;
-    renderOpponentsMap(mapContainer, opponentsList, { showStatus: false });
-    
-    showScreen('opponentsMap');
+    startGame();
 }
 
 // Начало игры
@@ -1949,7 +1888,7 @@ function checkGameState() {
         if (gameState.defeatedCount >= totalOpponents) {
             showVictory();
         } else {
-            showPostRoundScreen();
+            showUpgradeScreen();
         }
     } else if (gameState.spinsLeft === 0) {
         showDefeat();
@@ -2008,58 +1947,12 @@ function showUpgradeScreen() {
     showScreen('upgrade');
 }
 
-function showPostRoundScreen() {
-    const opponent = gameState.opponentsList[gameState.currentOpponentIndex];
-    const titleEl = document.getElementById('postRoundTitle');
-    const subtitleEl = document.getElementById('postRoundSubtitle');
-    const mapContainer = document.getElementById('postRoundMap');
-
-    if (titleEl && opponent) {
-        titleEl.textContent = `${opponent.name} повержен!`;
-    }
-    if (subtitleEl) {
-        const previous = typeof gameState.lastProgressPercent === 'number' ? gameState.lastProgressPercent : 100;
-        const randomDecrease = 3 + Math.random() * 9; // 3-12%
-        let nextValue = Math.round(previous - randomDecrease);
-        if (nextValue >= previous) {
-            nextValue = previous - 1;
-        }
-        if (nextValue < 2) {
-            nextValue = 2;
-        }
-        gameState.lastProgressPercent = nextValue;
-
-        subtitleEl.innerHTML = `Только <span class="post-round-progress">${nextValue}%</span> игроков доходят до этой стадии. Выбери бонус, чтобы усилить команду перед следующим матчем.`;
-    }
-
-    if (mapContainer) {
-        const opponentsList = gameState.opponentsList && gameState.opponentsList.length
-            ? gameState.opponentsList
-            : getOpponentsList(gameState.selectedClub.id);
-        if (!gameState.opponentsList || !gameState.opponentsList.length) {
-            gameState.opponentsList = opponentsList;
-        }
-        renderOpponentsMap(mapContainer, opponentsList, { showStatus: true });
-    }
-
-    playCheerSound();
-    showScreen('postRound');
-}
-
 // Показать экран
 function showScreen(screenName) {
     Object.values(screens).forEach(screen => {
         screen.classList.remove('active');
     });
     screens[screenName].classList.add('active');
-
-    if (screenName !== 'postRound') {
-        const warningEl = document.getElementById('postRoundWarning');
-        if (warningEl) {
-            warningEl.classList.remove('visible');
-            warningEl.textContent = '';
-        }
-    }
 }
 
 // Победа
@@ -2142,12 +2035,6 @@ function setupEventListeners() {
         this.classList.remove('pulling');
     });
     
-    // Кнопка начала битвы на карте оппонентов
-    document.getElementById('startBattleButton').addEventListener('click', () => {
-        activateAudio();
-        startGame();
-    });
-    
     document.getElementById('restartButton').addEventListener('click', () => {
         showScreen('clubSelection');
         gameState.boostedPlayers.clear();
@@ -2157,13 +2044,6 @@ function setupEventListeners() {
             sirenaButton.style.display = 'none';
         }
     });
-
-    const chooseBonusButton = document.getElementById('chooseBonusButton');
-    if (chooseBonusButton) {
-        chooseBonusButton.addEventListener('click', () => {
-            showUpgradeScreen();
-        });
-    }
 
     const sirenaRescueButton = document.getElementById('sirenaRescueButton');
     if (sirenaRescueButton) {

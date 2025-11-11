@@ -17,6 +17,8 @@
         <div class="football-decoration ball-3">⚽</div>
     </div>
     
+    <button id="musicToggleButton" class="music-toggle-button" type="button">Музыка: Афекс</button>
+
     <!-- Экран выбора клуба -->
     <div id="clubSelectionScreen" class="screen active">
         <div class="container">
@@ -27,19 +29,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Карта оппонентов -->
-    <div id="opponentsMapScreen" class="screen">
-        <div class="container">
-            <h2 class="title">Карта оппонентов</h2>
-            <p class="subtitle">Твои соперники в этом турнире. Пройдешь все 19 за один раз?</p>
-            <button id="startBattleButton" class="start-battle-button">Начать</button>
-            <div id="opponentsMap" class="opponents-map">
-                <!-- Оппоненты будут добавлены через JS -->
-            </div>
-        </div>
-    </div>
-
     <!-- Игровой экран -->
     <div id="gameScreen" class="screen">
         <div class="container">
@@ -109,16 +98,6 @@
             </div>
 
             <div id="damageDisplay" class="damage-display"></div>
-        </div>
-    </div>
-
-    <!-- Соперник побежден -->
-    <div id="postRoundScreen" class="screen">
-        <div class="container">
-            <h2 id="postRoundTitle" class="title">Соперник побежден!</h2>
-            <p id="postRoundSubtitle" class="subtitle">Выбери бонус, чтобы усилить команду перед следующим матчем.</p>
-            <button id="chooseBonusButton" class="start-battle-button">Выбрать бонус</button>
-            <div id="postRoundMap" class="opponents-map post-round-map"></div>
         </div>
     </div>
 
