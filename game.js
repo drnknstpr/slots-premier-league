@@ -11,6 +11,8 @@ let gameState = {
     isSpinning: false,
     audioContext: null, // AudioContext для звуков
     musicAudio: null,
+    musicTracks: null,
+    musicMode: 'aphex',
     spinAudio: null,
     spinAudioTimeout: null,
     cheerAudio: null,
@@ -36,6 +38,22 @@ let gameState = {
     tutorialCompletedCard: false
 };
 
+const MUSIC_MODE_SEQUENCE = ['aphex', 'matvey', 'off'];
+const MUSIC_MODE_CONFIG = {
+    aphex: {
+        label: 'Музыка: Афекс',
+        file: 'music/background.mp3'
+    },
+    matvey: {
+        label: 'Музыка: Матвей',
+        file: 'music/matvey.mp3'
+    },
+    off: {
+        label: 'Музыка: Тишина',
+        file: null
+    }
+};
+
 function getBoostMultiplier(playerId) {
     if (!playerId) {
         return 1;
@@ -57,11 +75,31 @@ function initAudio() {
 }
 
 function initBackgroundMusic() {
-    if (!gameState.musicAudio) {
-        const music = new Audio('music/background.mp3');
-        music.loop = true;
-        music.volume = 0.2;
-        gameState.musicAudio = music;
+    if (!gameState.musicTracks) {
+        gameState.musicTracks = {};
+    }
+
+    Object.entries(MUSIC_MODE_CONFIG).forEach(([mode, config]) => {
+        if (!config.file) {
+            return;
+        }
+        if (!gameState.musicTracks[mode]) {
+            const audio = new Audio(config.file);
+            audio.loop = true;
+            audio.volume = 0.2;
+            gameState.musicTracks[mode] = audio;
+        }
+    });
+
+    if (!gameState.musicMode || !MUSIC_MODE_SEQUENCE.includes(gameState.musicMode)) {
+        gameState.musicMode = MUSIC_MODE_SEQUENCE[0];
+    }
+
+    if (!gameState.musicAudio && gameState.musicMode !== 'off') {
+        const currentTrack = gameState.musicTracks[gameState.musicMode];
+        if (currentTrack) {
+            gameState.musicAudio = currentTrack;
+        }
     }
 
     const toggleButton = document.getElementById('musicToggleButton');
@@ -70,6 +108,54 @@ function initBackgroundMusic() {
         toggleButton.addEventListener('click', () => {
             toggleMusic();
         });
+    }
+
+    updateMusicToggleButton();
+}
+
+function updateMusicToggleButton() {
+    const button = document.getElementById('musicToggleButton');
+    if (!button) {
+        return;
+    }
+
+    const mode = MUSIC_MODE_SEQUENCE.includes(gameState.musicMode)
+        ? gameState.musicMode
+        : MUSIC_MODE_SEQUENCE[0];
+    const config = MUSIC_MODE_CONFIG[mode] || MUSIC_MODE_CONFIG.aphex;
+
+    button.textContent = config.label;
+    button.dataset.musicMode = mode;
+    button.classList.remove('is-muted');
+    button.classList.toggle('music-mode-off', mode === 'off');
+}
+
+function setMusicMode(mode, { autoPlay = false } = {}) {
+    initBackgroundMusic();
+
+    const normalizedMode = MUSIC_MODE_SEQUENCE.includes(mode) ? mode : MUSIC_MODE_SEQUENCE[0];
+    if (normalizedMode === gameState.musicMode) {
+        updateMusicToggleButton();
+        if (autoPlay) {
+            if (normalizedMode === 'off') {
+                stopBackgroundMusic();
+            } else {
+                ensureBackgroundMusic();
+            }
+        }
+        return;
+    }
+
+    stopBackgroundMusic();
+    gameState.musicMode = normalizedMode;
+    gameState.musicAudio = normalizedMode === 'off'
+        ? null
+        : (gameState.musicTracks ? gameState.musicTracks[normalizedMode] : null);
+
+    updateMusicToggleButton();
+
+    if (autoPlay && normalizedMode !== 'off') {
+        ensureBackgroundMusic();
     }
 }
 
@@ -105,10 +191,28 @@ function initGameSounds() {
 }
 
 function startBackgroundMusic() {
-    if (gameState.musicAudio) {
-        if (!gameState.musicAudio.muted && gameState.musicAudio.paused) {
-            gameState.musicAudio.play().catch(() => {});
+    if (gameState.musicMode === 'off') {
+        return;
+    }
+
+    initBackgroundMusic();
+
+    const tracks = gameState.musicTracks || {};
+    const audio = tracks[gameState.musicMode];
+
+    if (!audio) {
+        return;
+    }
+
+    gameState.musicAudio = audio;
+
+    try {
+        audio.muted = false;
+        if (audio.paused) {
+            audio.play().catch(() => {});
         }
+    } catch (e) {
+        console.warn('Ошибка запуска фоновой музыки', e);
     }
 }
 
@@ -121,45 +225,52 @@ function ensureBackgroundMusic() {
             // ignore resume errors
         }
     }
+
+    if (gameState.musicMode === 'off') {
+        stopBackgroundMusic();
+        return;
+    }
+
+    const tracks = gameState.musicTracks || {};
+    const audio = tracks[gameState.musicMode];
+    if (audio && gameState.musicAudio !== audio) {
+        gameState.musicAudio = audio;
+    }
+
     startBackgroundMusic();
 }
 
 function stopBackgroundMusic() {
-    if (gameState.musicAudio) {
+    if (gameState.musicTracks) {
+        Object.values(gameState.musicTracks).forEach(audio => {
+            if (!audio) {
+                return;
+            }
+            try {
+                audio.pause();
+                audio.currentTime = 0;
+            } catch (e) {
+                console.warn('Ошибка остановки фоновой музыки', e);
+            }
+        });
+    } else if (gameState.musicAudio) {
         try {
             gameState.musicAudio.pause();
         } catch (e) {
             console.warn('Ошибка остановки фоновой музыки', e);
         }
     }
+
+    gameState.musicAudio = null;
 }
 
-function toggleMusic(forceMute = null) {
-    if (!gameState.musicAudio) {
-        initBackgroundMusic();
-    }
-    if (!gameState.musicAudio) {
-        return;
-    }
-
-    const button = document.getElementById('musicToggleButton');
-    const shouldMute = forceMute === null ? !gameState.musicAudio.muted : forceMute;
-
-    gameState.musicAudio.muted = shouldMute;
-
-    if (shouldMute) {
-        stopBackgroundMusic();
-        if (button) {
-            button.classList.add('is-muted');
-            button.textContent = 'Включи XTAL';
-        }
-    } else {
-        ensureBackgroundMusic();
-        if (button) {
-            button.classList.remove('is-muted');
-            button.textContent = 'Выруби XTAL';
-        }
-    }
+function toggleMusic() {
+    const currentMode = MUSIC_MODE_SEQUENCE.includes(gameState.musicMode)
+        ? gameState.musicMode
+        : MUSIC_MODE_SEQUENCE[0];
+    const nextIndex = (MUSIC_MODE_SEQUENCE.indexOf(currentMode) + 1) % MUSIC_MODE_SEQUENCE.length;
+    const nextMode = MUSIC_MODE_SEQUENCE[nextIndex];
+    setMusicMode(nextMode, { autoPlay: true });
 }
 
 function playButtonClickSound() {
