@@ -5,7 +5,7 @@ let gameState = {
     currentOpponentIndex: 0,
     currentOpponentHP: 0,
     maxOpponentHP: 0,
-    spinsLeft: 6,
+    spinsLeft: 1,
     defeatedCount: 0,
     boostedPlayers: new Map(), // Map<ID, multiplier>
     isSpinning: false,
@@ -63,6 +63,14 @@ function initBackgroundMusic() {
         music.volume = 0.2;
         gameState.musicAudio = music;
     }
+
+    const toggleButton = document.getElementById('musicToggleButton');
+    if (toggleButton && !toggleButton.dataset.musicBound) {
+        toggleButton.dataset.musicBound = 'true';
+        toggleButton.addEventListener('click', () => {
+            toggleMusic();
+        });
+    }
 }
 
 function initGameSounds() {
@@ -98,7 +106,7 @@ function initGameSounds() {
 
 function startBackgroundMusic() {
     if (gameState.musicAudio) {
-        if (gameState.musicAudio.paused) {
+        if (!gameState.musicAudio.muted && gameState.musicAudio.paused) {
             gameState.musicAudio.play().catch(() => {});
         }
     }
@@ -114,6 +122,44 @@ function ensureBackgroundMusic() {
         }
     }
     startBackgroundMusic();
+}
+
+function stopBackgroundMusic() {
+    if (gameState.musicAudio) {
+        try {
+            gameState.musicAudio.pause();
+        } catch (e) {
+            console.warn('Ошибка остановки фоновой музыки', e);
+        }
+    }
+}
+
+function toggleMusic(forceMute = null) {
+    if (!gameState.musicAudio) {
+        initBackgroundMusic();
+    }
+    if (!gameState.musicAudio) {
+        return;
+    }
+
+    const button = document.getElementById('musicToggleButton');
+    const shouldMute = forceMute === null ? !gameState.musicAudio.muted : forceMute;
+
+    gameState.musicAudio.muted = shouldMute;
+
+    if (shouldMute) {
+        stopBackgroundMusic();
+        if (button) {
+            button.classList.add('is-muted');
+            button.textContent = 'Включи XTAL';
+        }
+    } else {
+        ensureBackgroundMusic();
+        if (button) {
+            button.classList.remove('is-muted');
+            button.textContent = 'Выруби XTAL';
+        }
+    }
 }
 
 function playButtonClickSound() {
@@ -609,7 +655,7 @@ function startGame() {
     gameState.defeatedCount = 0;
     gameState.boostedPlayers.clear();
     gameState.spinCount = 0;
-    gameState.spinsLeft = 6;
+    gameState.spinsLeft = 1;
     gameState.bonusGiven = false;
     gameState.lastProgressPercent = 100;
     gameState.penaltyWillTrigger = false;
@@ -647,10 +693,10 @@ function loadOpponent() {
     const opponent = gameState.opponentsList[gameState.currentOpponentIndex];
     gameState.maxOpponentHP = opponent.hp;
     gameState.currentOpponentHP = opponent.hp;
-    gameState.spinsLeft = 6;
+    gameState.spinsLeft = 1;
     gameState.spinCount = 0;
     gameState.bonusGiven = false;
-    gameState.penaltyWillTrigger = Math.random() < 0.033;
+    gameState.penaltyWillTrigger = false;
     gameState.penaltyActive = false;
     gameState.penaltyPhase = null;
     gameState.penaltyPlayer = null;
@@ -1106,29 +1152,12 @@ function updateGameUI() {
 async function spinSlots() {
     const spinButton = document.getElementById('spinButton');
 
-    if (gameState.penaltyActive) {
-        await handlePenaltyFlow();
-        return;
-    }
-
     if (gameState.spinsLeft === 0) {
         return;
     }
 
     const completedSpins = gameState.spinCount || 0;
     const upcomingSpinIndex = completedSpins + 1;
-    const penaltyEligible = completedSpins > 0;
-    if (penaltyEligible && !gameState.penaltyActive && !gameState.penaltyOccurred) {
-        if (gameState.penaltyWillTrigger || upcomingSpinIndex >= 3) {
-            if (startPenaltyEvent()) {
-                if (spinButton) {
-                    spinButton.classList.remove('pulling');
-                }
-                await handlePenaltyFlow();
-                return;
-            }
-        }
-    }
 
     if (gameState.isSpinning) {
         return;
@@ -1166,13 +1195,12 @@ async function spinSlots() {
 
     const spinResults = [];
     const spinDuration = 2640;
-    const settleDelay = 384;
 
     const totalSlots = slots.length;
     const canOfferSirenaBonus =
         !gameState.bonusGiven &&
         !gameState.sirenaClaimed &&
-        gameState.spinCount >= 2 &&
+        gameState.spinCount >= 1 &&
         totalSlots > 0 &&
         gameState.tutorialCompletedCard;
     const sirenaBonusPlan = canOfferSirenaBonus
@@ -1183,18 +1211,22 @@ async function spinSlots() {
         : null;
 
     startPlayerRandomizeSound();
+    startSpinSound(spinDuration);
 
     try {
-        for (let index = 0; index < slots.length; index++) {
-            const slot = slots[index];
-            startSpinSound(spinDuration);
+        slots.forEach(slot => {
             slot.classList.add('spinning');
             createSpinningEffect(slot);
+        });
 
-            await wait(spinDuration);
-            stopSpinSound();
+        await wait(spinDuration);
+        stopSpinSound();
 
-            slot.classList.remove('spinning');
+        slots.forEach(slot => slot.classList.remove('spinning'));
+        stopPlayerRandomizeSound();
+
+        for (let index = 0; index < slots.length; index++) {
+            const slot = slots[index];
             let preferredRole = null;
             let roleBiasMultiplier = 1;
 
@@ -1228,23 +1260,9 @@ async function spinSlots() {
             spinResults.push(entry);
 
             if (!gameState.tutorialCompletedCard) {
-                const hadRandomizeSound = gameState.randomizeSoundNodes.length > 0;
-                if (hadRandomizeSound) {
-                    stopPlayerRandomizeSound();
-                }
                 await triggerTutorialCardInfo();
-                if (hadRandomizeSound && index < slots.length - 1) {
-                    startPlayerRandomizeSound();
-                }
-            }
-
-            if (index < slots.length - 1) {
-                await wait(settleDelay);
             }
         }
-
-        stopPlayerRandomizeSound();
-        stopSpinSound();
 
         if (sirenaBonusPlan && sirenaBonusPlan.entry && spinResults.includes(sirenaBonusPlan.entry)) {
             const { slot, player } = sirenaBonusPlan.entry;
@@ -1505,7 +1523,11 @@ async function animateDamageBreakdown(players, contributions, baseDamage, totalD
         return;
     }
 
-    const { preserveBaseSumValue = false } = displayOptions || {};
+    const { preserveBaseSumValue = false, delayBeforeStart = 0 } = displayOptions || {};
+
+    if (delayBeforeStart > 0) {
+        await wait(delayBeforeStart);
+    }
 
     damageDisplay.innerHTML = '';
     damageDisplay.classList.remove('damage-pop');
@@ -1728,7 +1750,7 @@ async function applyDamageForPlayers(players, sourceSlots = [], options = {}) {
         hpBefore,
         hpAfter,
         bonusDamage,
-        { preserveBaseSumValue }
+        { preserveBaseSumValue, delayBeforeStart: 1000 }
     );
 
     playHitSound();
@@ -1960,7 +1982,7 @@ function showDefeat() {
 
 function continueAfterRescue() {
     stopCheerSound();
-    gameState.spinsLeft = 6;
+    gameState.spinsLeft = 1;
     gameState.isSpinning = false;
     gameState.penaltyActive = false;
     gameState.penaltyPhase = null;
