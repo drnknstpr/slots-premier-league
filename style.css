@@ -2372,7 +2372,7 @@ body::after {
 }
 
 .upgrade-opponent-message {
-    font-size: 1.1rem;
+    font-size: 1.21rem;
     font-weight: 600;
     color: rgba(134, 239, 172, 0.95);
     text-transform: uppercase;
