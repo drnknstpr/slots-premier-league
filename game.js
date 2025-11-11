@@ -2032,6 +2032,13 @@ function setupEventListeners() {
             continueAfterRescue();
         });
     }
+
+    const sirenaTeamButton = document.getElementById('sirenaTeamButton');
+    if (sirenaTeamButton) {
+        sirenaTeamButton.addEventListener('click', () => {
+            window.open('https://sirena.team', '_blank', 'noopener');
+        });
+    }
 }
 
 // Запуск игры
