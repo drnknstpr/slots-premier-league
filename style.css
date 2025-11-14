@@ -12,7 +12,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
-    font-weight: 400;
+    font-weight: 300;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -244,7 +244,7 @@ body::after {
 
 .title {
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: 600;
     margin-bottom: 16px;
     opacity: 1;
     letter-spacing: -1px;
@@ -257,7 +257,7 @@ body::after {
 
 .subtitle {
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: 300;
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 40px;
     text-align: center;
@@ -274,7 +274,7 @@ body::after {
     background: rgba(244, 63, 94, 0.18);
     border: 1px solid rgba(244, 63, 94, 0.35);
     color: #fda4af;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     cursor: pointer;
@@ -370,7 +370,7 @@ body::after {
 
 .club-name {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 400;
     margin-top: 12px;
     color: #ffffff;
     text-align: center;
@@ -426,7 +426,7 @@ body::after {
     padding: 6px 12px;
     border-radius: 999px;
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     background: rgba(148, 163, 184, 0.2);
@@ -479,7 +479,7 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 0.9rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
@@ -494,7 +494,7 @@ body::after {
 
 .opponent-map-name {
     font-size: 1rem;
-    font-weight: bold;
+    font-weight: 500;
     margin: 8px 0;
     color: #fff;
     line-height: 1.35;
@@ -503,7 +503,7 @@ body::after {
 .opponent-map-hp {
     font-size: 0.85rem;
     color: #4ade80;
-    font-weight: 600;
+    font-weight: 400;
     margin-top: auto;
 }
 
@@ -513,7 +513,7 @@ body::after {
     border: none;
     padding: 18px 48px;
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 500;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -597,7 +597,7 @@ body::after {
 .opponent-info-content h2 {
     margin: 0 0 0 6px;
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #ffffff;
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     line-height: 1.2;
@@ -612,7 +612,7 @@ body::after {
     padding: 6px 22px;
     border-radius: 999px;
     font-size: 1.3rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #ecfdf5;
     letter-spacing: 0.6px;
     background: rgba(15, 23, 42, 0.55);
@@ -930,7 +930,7 @@ body::after {
 
 .stat {
     font-size: 1.1rem;
-    font-weight: 650;
+    font-weight: 400;
     padding: 16px 24px;
 }
 
@@ -942,7 +942,7 @@ body::after {
 
 .stat {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 400;
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
     padding: 12px 20px;
@@ -957,7 +957,7 @@ body::after {
     border: 1px solid rgba(248, 113, 113, 0.45);
     background: rgba(248, 113, 113, 0.18);
     color: #fecaca;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 0.95rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1035,7 +1035,7 @@ body::after {
 
 .machine-title {
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #ffffff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     letter-spacing: -0.5px;
@@ -1045,7 +1045,7 @@ body::after {
 .machine-subtitle {
     font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.7);
-    font-weight: 500;
+    font-weight: 300;
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1207,7 +1207,7 @@ body::after {
 
 .player-name {
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 400;
     text-align: center;
     color: #ffffff;
     text-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
@@ -1226,14 +1226,14 @@ body::after {
 }
 
 .player-position {
-    font-weight: 600;
+    font-weight: 400;
     color: rgba(255, 255, 255, 0.65);
     letter-spacing: 0.1em;
 }
 
 .player-rating {
     font-size: 2.6rem;
-    font-weight: 800;
+    font-weight: 600;
     color: #34d399;
     text-shadow: 
         0 0 24px rgba(52, 211, 153, 0.45),
@@ -1252,7 +1252,7 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 1.05rem;
     color: #34d399;
     border: 1px solid rgba(52, 211, 153, 0.45);
@@ -1345,20 +1345,20 @@ body::after {
 
 .bonus-card-reward-amount {
     font-size: 1.6rem;
-    font-weight: 900;
+    font-weight: 600;
     color: #facc15;
     text-shadow: 0 0 18px rgba(250, 204, 21, 0.55);
 }
 
 .bonus-card-reward-label {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 500;
     color: rgba(255, 255, 255, 0.8);
 }
 
 .bonus-card-title {
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -1378,7 +1378,7 @@ body::after {
     border: none;
     background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
     color: #ffffff;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -1545,7 +1545,7 @@ body::after {
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.12em;
     gap: 8px;
     text-align: center;
@@ -1619,7 +1619,7 @@ body::after {
     border-radius: 16px;
     padding: 18px 48px;
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #ffffff;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1754,7 +1754,7 @@ body::after {
 
 .lever-base {
     font-size: 0.9rem;
-    font-weight: bold;
+    font-weight: 500;
     color: #4ade80;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     margin-top: 5px;
@@ -1842,7 +1842,7 @@ body::after {
 
 .damage-breakdown-active {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: 0.02em;
 }
 
@@ -1902,7 +1902,7 @@ body::after {
 
 .damage-chip-value {
     font-size: 1.2rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.08em;
 }
 
@@ -1923,7 +1923,7 @@ body::after {
 
 .damage-operator {
     font-size: 1.8rem;
-    font-weight: 800;
+    font-weight: 600;
     color: rgba(250, 204, 21, 0.8);
     opacity: 0;
     transform: translateY(14px);
@@ -1937,7 +1937,7 @@ body::after {
 
 .damage-total {
     font-size: 2.4rem;
-    font-weight: 900;
+    font-weight: 600;
     color: #facc15;
     letter-spacing: 0.04em;
     opacity: 0;
@@ -1962,7 +1962,7 @@ body::after {
     background: rgba(15, 118, 110, 0.22);
     border: 1px solid rgba(20, 184, 166, 0.45);
     color: #5eead4;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     opacity: 0;
@@ -1978,7 +1978,7 @@ body::after {
 
 .damage-combo {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgba(244, 114, 182, 0.85);
@@ -1994,7 +1994,7 @@ body::after {
 
 .damage-final {
     font-size: 3rem;
-    font-weight: 900;
+    font-weight: 600;
     color: #f97316;
     text-shadow: 
         0 0 34px rgba(249, 115, 22, 0.75),
@@ -2019,7 +2019,7 @@ body::after {
     border: 1px solid rgba(244, 114, 182, 0.4);
     color: rgba(251, 207, 232, 0.95);
     letter-spacing: 0.08em;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
     opacity: 0;
     transform: translateY(12px);
@@ -2057,7 +2057,7 @@ body::after {
     background: rgba(30, 64, 175, 0.42);
     border: 1px solid rgba(191, 219, 254, 0.35);
     color: rgba(219, 234, 254, 0.92);
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.08em;
     opacity: 0;
     transform: translateY(12px);
@@ -2078,7 +2078,7 @@ body::after {
 
 .damage-sum-value {
     font-size: 1.35rem;
-    font-weight: 900;
+    font-weight: 600;
     color: #bfdbfe;
 }
 
@@ -2092,7 +2092,7 @@ body::after {
     background: rgba(13, 148, 136, 0.28);
     border: 1px solid rgba(45, 212, 191, 0.4);
     color: rgba(165, 243, 252, 0.95);
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.08em;
     opacity: 0;
     transform: translateY(12px);
@@ -2131,7 +2131,7 @@ body::after {
     background: rgba(17, 24, 39, 0.55);
     border: 1px solid rgba(148, 163, 184, 0.35);
     color: rgba(226, 232, 240, 0.95);
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.08em;
     opacity: 0;
     transform: translateY(12px);
@@ -2157,7 +2157,7 @@ body::after {
 
 .damage-hp-value {
     font-size: 1.4rem;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .damage-hp-value.before {
@@ -2400,7 +2400,7 @@ body::after {
 
 .upgrade-opponent-message {
     font-size: 1.21rem;
-    font-weight: 600;
+    font-weight: 400;
     color: rgba(134, 239, 172, 0.95);
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -2443,7 +2443,7 @@ body::after {
         0 12px 26px rgba(16, 185, 129, 0.35),
         inset 0 1px 0 rgba(255, 255, 255, 0.18);
     color: #ecfccb;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -2473,7 +2473,7 @@ body::after {
     border: none;
     border-radius: 12px;
     color: #ffffff;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     margin-top: 30px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2490,7 +2490,7 @@ body::after {
 
 .result-status {
     font-size: 1.4rem;
-    font-weight: 700;
+    font-weight: 500;
     color: rgba(248, 113, 113, 0.95);
     text-transform: uppercase;
     letter-spacing: 0.18em;
@@ -2589,7 +2589,7 @@ body::after {
 }
 
 .post-round-progress {
-    font-weight: 800;
+    font-weight: 600;
     color: #facc15;
     text-shadow:
         0 0 18px rgba(250, 204, 21, 0.6),
@@ -2634,7 +2634,7 @@ body::after {
 
 .tutorial-content h3 {
     font-size: 1.4rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #bae6fd;
@@ -2669,7 +2669,7 @@ body::after {
     border-radius: 12px;
     padding: 12px 24px;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     cursor: pointer;
@@ -2752,7 +2752,7 @@ body::after {
     border: 1px solid rgba(125, 211, 252, 0.35);
     color: rgba(165, 243, 252, 0.95);
     letter-spacing: 0.08em;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
 }
 
